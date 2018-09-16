@@ -37,6 +37,8 @@ module.exports = app => {
     const blogs = await Blog.find({ _user: req.user.id });
     console.log('\n\nSERVING FROM MONGO');
     res.send(blogs);
+
+    // Set expiration to 24 hours
     client.set(req.user.id, JSON.stringify(blogs), 'EX', 60 * 60 * 24);
 
   });
