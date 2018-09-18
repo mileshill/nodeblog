@@ -3,26 +3,38 @@ const redis = require('redis');
 const redisCONFIG = require('../config/dev').redisCONFIG;
 const util = require('util');
 
-const client = redis.createClient(redisCONFIG);
-client.get = util.promisify(client.get); // Promisify
 
-// Get reference to existing exec function on
-// default mongoose query
+// Create the Redis client; promisify the hget method for async/await functionality
+const client = redis.createClient(redisCONFIG);
+client.hget = util.promisify(client.hget); // Promisify
+
+// Get reference to existing exec function on default mongoose query
 const exec = mongoose.Query.prototype.exec;
 
-// Overridding to implement caching
-mongoose.Query.prototype.exec = async function () {
+// Toggable cache providing compound keys
+mongoose.Query.prototype.cache = function (options = {}) {
+    this.useCache = true;
+    this.hashKey = JSON.stringify(options.key || '');
+    return this;
+}
 
-    // 'this' is a reference to the current query that is being executed
-    // Using Object.assign prevents the modification of original query
+
+// Overridding exec to create caching options
+mongoose.Query.prototype.exec = async function () {
+    // Don't cache the query
+    if(!this.useCache){
+        return exec.apply(this, arguments);
+    }
+
+    // Safe object copying; will not modify the query object
     const key = JSON.stringify(Object.assign({}, this.getQuery(), {
         collection: this.mongooseCollection.name
     }));
 
-    // Check redis for existing value
-    // If existing values are present, determine if singleton or array,
-    // Map this.model to the respective elements
-    const cacheValue = await client.get(key);
+    // If existing cached value:
+    // Apply query model to singleton
+    // Map query model to array
+    const cacheValue = await client.hget(this.hashKey, key);
     if (cacheValue){
         const doc = JSON.parse(cacheValue);
 
@@ -31,13 +43,8 @@ mongoose.Query.prototype.exec = async function () {
         : new this.model(doc); 
     }
 
-    // Else, issue query and store result
-    // Mongoose returns model instances
-    const result = await  exec.apply(this, arguments); // Original untouched exec
-    
-    // Set value in cache
-    client.set(key, JSON.stringify(result));
-    
-    // Return result
+    // No cached value. Stringify result and return
+    const result = await exec.apply(this, arguments); // Original untouched exec
+    client.hset(this.hashKey, key, JSON.stringify(result));
     return result;
 }
