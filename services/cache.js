@@ -23,10 +23,16 @@ mongoose.Query.prototype.exec = async function () {
     // Check redis for existing value
     const cacheValue = await client.get(key);
     if (cacheValue){
-        console.log(cacheValue);
+        return JSON.parse(cacheValue);
     }
 
     // Else, issue query and store result
+    // Mongoose returns model instances
     const result = await  exec.apply(this, arguments); // Original untouched exec
-    console.log(result);
+    
+    // Set value in cache
+    client.set(key, JSON.stringify(result));
+    
+    // Return result
+    return result;
 }
