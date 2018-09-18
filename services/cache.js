@@ -19,11 +19,16 @@ mongoose.Query.prototype.exec = async function () {
         collection: this.mongooseCollection.name
     }));
 
-
     // Check redis for existing value
+    // If existing values are present, determine if singleton or array,
+    // Map this.model to the respective elements
     const cacheValue = await client.get(key);
     if (cacheValue){
-        return JSON.parse(cacheValue);
+        const doc = JSON.parse(cacheValue);
+
+        return Array.isArray(doc) 
+        ? doc.map(record => new this.model(record))
+        : new this.model(doc); 
     }
 
     // Else, issue query and store result
