@@ -3,6 +3,9 @@ const requireLogin = require('../middlewares/requireLogin');
 
 const config = require('../config/dev');
 const redisCONFIG = config.redisCONFIG;
+const { clearHash } = require('../services/cache');
+
+
 
 const Blog = mongoose.model('Blog');
 
@@ -35,6 +38,7 @@ module.exports = app => {
     try {
       await blog.save();
       res.send(blog);
+      clearHash(req.user.id);
     } catch (err) {
       res.send(400, err);
     }

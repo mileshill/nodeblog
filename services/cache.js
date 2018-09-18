@@ -48,3 +48,9 @@ mongoose.Query.prototype.exec = async function () {
     client.hset(this.hashKey, key, JSON.stringify(result), 'EX', 60 * 10); // 10 min expiration
     return result;
 }
+
+module.exports = {
+    clearHash(hashKey){
+        client.del(JSON.stringify(hashKey));
+    }
+};
