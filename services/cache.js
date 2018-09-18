@@ -45,6 +45,6 @@ mongoose.Query.prototype.exec = async function () {
 
     // No cached value. Stringify result and return
     const result = await exec.apply(this, arguments); // Original untouched exec
-    client.hset(this.hashKey, key, JSON.stringify(result));
+    client.hset(this.hashKey, key, JSON.stringify(result), 'EX', 60 * 10); // 10 min expiration
     return result;
 }
