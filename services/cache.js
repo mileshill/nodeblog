@@ -11,14 +11,22 @@ client.get = util.promisify(client.get); // Promisify
 const exec = mongoose.Query.prototype.exec;
 
 // Overridding to implement caching
-mongoose.Query.prototype.exec = function () {
+mongoose.Query.prototype.exec = async function () {
 
     // 'this' is a reference to the current query that is being executed
-    //Object.assign(target, original, otherKeys);
     // Using Object.assign prevents the modification of original query
-    const key = Object.assign({}, this.getQuery(), {
+    const key = JSON.stringify(Object.assign({}, this.getQuery(), {
         collection: this.mongooseCollection.name
-    });
+    }));
 
-    return exec.apply(this, arguments); // Original untouched exec
+
+    // Check redis for existing value
+    const cacheValue = await client.get(key);
+    if (cacheValue){
+        console.log(cacheValue);
+    }
+
+    // Else, issue query and store result
+    const result = await  exec.apply(this, arguments); // Original untouched exec
+    console.log(result);
 }
