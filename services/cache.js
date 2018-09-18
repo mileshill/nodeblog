@@ -1,4 +1,10 @@
 const mongoose = require('mongoose');
+const redis = require('redis');
+const redisCONFIG = require('../config/dev').redisCONFIG;
+const util = require('util');
+
+const client = redis.createClient(redisCONFIG);
+client.get = util.promisify(client.get); // Promisify
 
 // Get reference to existing exec function on
 // default mongoose query
