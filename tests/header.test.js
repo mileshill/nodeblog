@@ -5,18 +5,25 @@
 const puppeteer = require('puppeteer');
 const APP='localhost:3000';
 
-// Launch new chromium instance
-test('Brand logo in header', async () => {
+let browser, page;
+beforeEach(async () => {
     // Open browser
-    const browser = await puppeteer.launch({
+    browser = await puppeteer.launch({
         headless: false
     });
     // Open page and navigate to app
-    const page = await browser.newPage();
+    page = await browser.newPage();
     await page.goto(APP);
+});
 
+afterEach(async ()=>{
+    browser.close();
+})
+
+
+// Launch new chromium instance
+test('Brand logo in header', async () => {
     // Get logo
     const text = await page.$eval('a.brand-logo', el => el.innerHTML);
-
     expect(text).toEqual('Blogster');
 });
