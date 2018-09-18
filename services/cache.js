@@ -6,6 +6,13 @@ const exec = mongoose.Query.prototype.exec;
 
 // Overridding to implement caching
 mongoose.Query.prototype.exec = function () {
-    console.log('About to run a query!!!');
+
+    // 'this' is a reference to the current query that is being executed
+    //Object.assign(target, original, otherKeys);
+    // Using Object.assign prevents the modification of original query
+    const key = Object.assign({}, this.getQuery(), {
+        collection: this.mongooseCollection.name
+    });
+
     return exec.apply(this, arguments); // Original untouched exec
 }
