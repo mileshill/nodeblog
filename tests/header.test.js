@@ -17,7 +17,7 @@ beforeEach(async () => {
 });
 
 afterEach(async ()=>{
-    browser.close();
+    await browser.close();
 })
 
 
