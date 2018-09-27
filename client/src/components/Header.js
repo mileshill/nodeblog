@@ -19,7 +19,7 @@ class Header extends Component {
             <Link to="/blogs">My Blogs</Link>
           </li>,
           <li key="2">
-            <a href={'/auth/logout'}>Logout</a>
+            <a href={'/auth/logout'} id="logout">Logout</a>
           </li>
         ];
     }
