@@ -1,9 +1,6 @@
 /**
  * Make sure to include 'await' with any command using puppeteer
  */
-const APP='localhost:3000';
-const sessionFactory = require('./factories/sessionFactory');
-const userFactory = require('./factories/userFactory');
 const Page = require('./helpers/page');
 /**
  *  Setup and Teardown
@@ -11,7 +8,7 @@ const Page = require('./helpers/page');
 let page;
 beforeEach(async () => {
     page = await Page.build();
-    await page.goto(APP);
+    await page.goto('localhost:3000');
 });
 
 afterEach(async ()=>{
@@ -38,22 +35,10 @@ test('Clicking login starts oauth flow', async () => {
 });
 
 test('When signed in, shows logout button', async () =>{
-    // User id and session
-    //const id = '5b9e49d3d48ecc490b1cb7f7';
-    const user = await userFactory();
-    const { session, sig } = sessionFactory(user);
+    await page.login();
     
-    // Page already navigated to app
-    // Set the cookies on the home page
-    // Refresh to show login
-    await page.setCookie({name: 'session', value: session });
-    await page.setCookie({name: 'session.sig', value: sig});
-    await page.goto(APP);
-
     // Wait for the DOM  element to load
     // Extract DOM element and get text
-    await page.waitFor('#logout');
     const text = await page.$eval('#logout', el => el.innerHTML);
-    
     expect(text).toEqual('Logout');
 });
