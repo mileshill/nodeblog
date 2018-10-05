@@ -1,27 +1,26 @@
 /**
  * Make sure to include 'await' with any command using puppeteer
  */
-
-const puppeteer = require('puppeteer');
 const APP='localhost:3000';
 const sessionFactory = require('./factories/sessionFactory');
 const userFactory = require('./factories/userFactory');
-
-let browser, page;
+const Page = require('./helpers/page');
+/**
+ *  Setup and Teardown
+ */
+let page;
 beforeEach(async () => {
-    // Open browser
-    browser = await puppeteer.launch({
-        headless: false
-    });
-    // Open page and navigate to app
-    page = await browser.newPage();
+    page = await Page.build();
     await page.goto(APP);
 });
 
 afterEach(async ()=>{
-    await browser.close();
+    await page.close();
 })
 
+/**
+ *  Integration Testing
+ */
 // Launch new chromium instance
 test('Brand logo in header', async () => {
     // Get logo
