@@ -21,7 +21,8 @@ afterEach(async ()=>{
 // Launch new chromium instance
 test('Brand logo in header', async () => {
     // Get logo
-    const text = await page.$eval('a.brand-logo', el => el.innerHTML);
+    //const text = await page.$eval('a.brand-logo', el => el.innerHTML);
+    const text = await page.getContentsOf('a.brand-logo');    
     expect(text).toEqual('Blogster');
 });
 
@@ -39,6 +40,6 @@ test('When signed in, shows logout button', async () =>{
     
     // Wait for the DOM  element to load
     // Extract DOM element and get text
-    const text = await page.$eval('#logout', el => el.innerHTML);
+    const text = await page.getContentsOf('#logout');
     expect(text).toEqual('Logout');
 });
