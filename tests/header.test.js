@@ -36,7 +36,7 @@ test('Clicking login starts oauth flow', async () => {
     expect(url).toMatch(/accounts\.google\.com/);
 });
 
-test.only('When signed in, shows logout button', async () =>{
+test('When signed in, shows logout button', async () =>{
     // User id and session
     const id = '5b9e49d3d48ecc490b1cb7f7';
     const Buffer = require('safe-buffer').Buffer;
